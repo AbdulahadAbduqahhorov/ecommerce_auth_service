@@ -8,7 +8,7 @@ import (
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/config"
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/genproto/auth_service"
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/storage"
-	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/util"
+	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/pkg/util"
 	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -76,19 +76,23 @@ func (s *authService) GetUserById(ctx context.Context, req *auth_service.GetUser
 	return res, nil
 }
 
-func (s *authService) UpdateUserById(ctx context.Context, req *auth_service.UpdateUserRequest) (*auth_service.User, error) {
-	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-	email := emailRegex.MatchString(req.Email)
-	if !email {
-		err := fmt.Errorf("email is not valid")
-		return nil, err
+func (s *authService) UpdateUser(ctx context.Context, req *auth_service.UpdateUserRequest) (*auth_service.User, error) {
+	if len(req.Email)>0{
+		emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+		email := emailRegex.MatchString(req.Email)
+		if !email {
+			err := fmt.Errorf("email is not valid")
+			return nil, err
+		}
 	}
 
-	phoneRegex := regexp.MustCompile(`^[+]?(\d{1,2})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$`)
+	if len(req.Phone)>0{
+		phoneRegex := regexp.MustCompile(`^[+]?(\d{1,2})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$`)
 	phone := phoneRegex.MatchString(req.Phone)
 	if !phone {
 		err := fmt.Errorf("phone number is not valid")
 		return nil, err
+	}
 	}
 
 

@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/genproto/auth_service"
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/pkg/helper"
@@ -41,7 +43,7 @@ func (a userRepo) CreateUser(req *auth_service.CreateUserRequest) (string, error
 		$6,
 		$7
 		)`
-	_, err := a.db.Exec(query, id, req.FullName, req.Login, req.Phone,req.Email, req.Password, req.UserType)
+	_, err := a.db.Exec(query, id, req.FullName, req.Login, req.Phone, req.Email, req.Password, req.UserType)
 	if err != nil {
 		return "", err
 	}
@@ -68,7 +70,7 @@ func (a userRepo) GetUserList(req *auth_service.GetUserListRequest) (*auth_servi
 	order := " ORDER BY created_at"
 	offset := " OFFSET 0"
 	limit := " LIMIT 10"
-	
+
 	if len(req.Search) > 0 {
 		params["search"] = req.Search
 		filter += " AND ((full_name || phone || login) ILIKE ('%' || :search || '%'))"
@@ -87,14 +89,14 @@ func (a userRepo) GetUserList(req *auth_service.GetUserListRequest) (*auth_servi
 		limit = " LIMIT :limit"
 	}
 
-	// cQ := `SELECT count(1) FROM "user"` + filter
-	// cQ, arr = helper.ReplaceQueryParams(cQ, params)
-	// err = r.db.QueryRow(cQ, arr...).Scan(
-	// 	&res.Count,
-	// )
-	// if err != nil {
-	// 	return res, err
-	// }
+	cQ := `SELECT count(1) FROM "user"` + filter
+	cQ, arr = helper.ReplaceQueryParams(cQ, params)
+	err := a.db.QueryRow(cQ, arr...).Scan(
+		&res.Count,
+	)
+	if err != nil {
+		return res, err
+	}
 
 	q := query + filter + order + offset + limit
 
@@ -108,7 +110,6 @@ func (a userRepo) GetUserList(req *auth_service.GetUserListRequest) (*auth_servi
 	for rows.Next() {
 		obj := &auth_service.User{}
 		var updatedAt sql.NullString
-
 
 		err = rows.Scan(
 			&obj.Id,
@@ -152,7 +153,7 @@ func (a userRepo) GetUserById(id string) (*auth_service.User, error) {
 	WHERE
 		id = $1`
 
-	err := a.db.QueryRow(query,id).Scan(
+	err := a.db.QueryRow(query, id).Scan(
 		&res.Id,
 		&res.FullName,
 		&res.Login,
@@ -166,53 +167,70 @@ func (a userRepo) GetUserById(id string) (*auth_service.User, error) {
 	if err != nil {
 		return res, err
 	}
-	if updatedAt.Valid{
-		res.UpdatedAt=updatedAt.String
+	if updatedAt.Valid {
+		res.UpdatedAt = updatedAt.String
 	}
 
 	return res, nil
 }
 
-func (a userRepo) UpdateUser(req *auth_service.UpdateUserRequest)(int64,error){
+func (a userRepo) UpdateUser(req *auth_service.UpdateUserRequest) (int64, error) {
 
-	query := `UPDATE "user" SET
-		full_name=:full_name,	
-		login = :login,
-		email=:email,
-		phone = :phone,
-		updated_at = now()
-	WHERE
-		id = :id`
-
-	params := map[string]interface{}{
-		"id":                 req.Id,
-		"full_name":          req.FullName,
-		"login": 			  req.Login,
-		"email":			  req.Email,
-		"phone":     		  req.Phone,
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	argId := 1
+	if len(strings.Trim(req.Login, " ")) > 0 {
+		setValues = append(setValues, fmt.Sprintf("login=$%d ", argId))
+		args = append(args, req.Login)
+		argId++
+	}
+	if len(strings.Trim(req.FullName, " ")) > 0 {
+		setValues = append(setValues, fmt.Sprintf("full_name=$%d ", argId))
+		args = append(args, req.FullName)
+		argId++
+	}
+	if len(strings.Trim(req.Email, " ")) > 0 {
+		setValues = append(setValues, fmt.Sprintf("email=$%d ", argId))
+		args = append(args, req.Email)
+		argId++
+	}
+	if len(strings.Trim(req.Phone, " ")) > 0 {
+		setValues = append(setValues, fmt.Sprintf("phone=$%d ", argId))
+		args = append(args, req.Phone)
+		argId++
 	}
 
-	q, arr := helper.ReplaceQueryParams(query, params)
-	result, err := a.db.Exec(q, arr...)
+	s := strings.Join(setValues, ",")
+	query := fmt.Sprintf(`
+			UPDATE "user"
+			SET %s ,updated_at = now()
+			WHERE id = $%d`,
+		s, argId)
+
+	args = append(args, req.Id)
+
+	result, err := a.db.Exec(query, args...)
 	if err != nil {
 		return 0, err
 	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return rowsAffected, nil
 
-	rowsAffected ,err:= result.RowsAffected()
-
-	return rowsAffected, err
 }
 
-func (a userRepo) DeleteUser(id string)(int64,error){
+func (a userRepo) DeleteUser(id string) (int64, error) {
 
 	query := `DELETE FROM "user" WHERE id = $1`
 
-	result, err := a.db.Exec(query,id)
+	result, err := a.db.Exec(query, id)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected ,err:= result.RowsAffected()
+	rowsAffected, err := result.RowsAffected()
 
 	return rowsAffected, err
 }
@@ -283,4 +301,3 @@ func (u userRepo) GetUserByUsername(username string) (*auth_service.User, error)
 
 	return res, nil
 }
-

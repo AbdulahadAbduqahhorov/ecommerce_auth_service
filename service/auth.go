@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/genproto/auth_service"
-	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/util"
+	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/pkg/util"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (s *authService) Register(ctx context.Context, req *auth_service.RegisterUserRequest) (*auth_service.User, error) {
-	
+
 	hashedPassword, err := util.HashPassword(req.Password)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "util.HashPassword() : %v", err)
@@ -61,7 +61,7 @@ func (s *authService) Login(ctx context.Context, req *auth_service.LoginRequest)
 		return nil, status.Errorf(codes.Unauthenticated, "login or password is wrong")
 	}
 	m := map[string]interface{}{
-		"user_id":  user.Id,
+		"user_id":   user.Id,
 		"user_type": user.UserType,
 	}
 	tokenStr, err := util.GenerateJWT(m, time.Minute*10, s.cfg.SecretKey)
@@ -78,8 +78,8 @@ func (s *authService) HasAccess(ctx context.Context, req *auth_service.TokenRequ
 	if err != nil {
 		log.Println(status.Errorf(codes.Unauthenticated, "method ParseClaims: %v", err))
 		return &auth_service.HasAccessResponse{
-			UserId:  "",
-			UserType: "",
+			UserId:    "",
+			UserType:  "",
 			HasAccess: false,
 		}, nil
 	}
@@ -87,15 +87,15 @@ func (s *authService) HasAccess(ctx context.Context, req *auth_service.TokenRequ
 	if err != nil {
 		log.Println(status.Errorf(codes.Unauthenticated, "method GetUserById: %v", err))
 		return &auth_service.HasAccessResponse{
-			UserId:  "",
-			UserType: "",
+			UserId:    "",
+			UserType:  "",
 			HasAccess: false,
 		}, nil
 	}
 	log.Println(res.Username)
 	return &auth_service.HasAccessResponse{
-		UserId:      user.Id,
-		UserType: user.UserType,
+		UserId:    user.Id,
+		UserType:  user.UserType,
 		HasAccess: true,
 	}, nil
 }
