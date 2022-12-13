@@ -6,9 +6,9 @@ import (
 
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/config"
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/genproto/auth_service"
+	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/pkg/logger"
 	"github.com/AbdulahadAbduqahhorov/gRPC/Ecommerce/ecommerce_auth_service/service"
 	"github.com/jmoiron/sqlx"
-	"github.com/labstack/gommon/log"
 	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
 )
@@ -16,6 +16,9 @@ import (
 func main() {
 	var err error
 	cfg := config.Load()
+	loggerLevel := logger.LevelDebug
+	log := logger.NewLogger("auth_service", loggerLevel)
+	defer logger.Cleanup(log)
 	connP := fmt.Sprintf(
 		"host=%v port=%v user=%v password=%v dbname=%v sslmode=disable",
 		cfg.PostgresHost,
@@ -26,19 +29,21 @@ func main() {
 
 	db, err := sqlx.Connect("postgres", connP)
 	if err != nil {
-		panic(err)
+		log.Panic("postgres.NewPostgres", logger.Error(err))
 	}
-	authService := service.NewAuthService(cfg, db)
+	authService := service.NewAuthService(log,cfg, db)
 
 	lis, err := net.Listen("tcp", cfg.GrpcPort)
 	if err != nil {
-		log.Error("error while listening: %v", err)
-		return
+		log.Panic("net.Listen", logger.Error(err))
 	}
 	service := grpc.NewServer()
 	auth_service.RegisterAuthServiceServer(service, authService)
+
+	log.Info("GRPC: Server being started...", logger.String("port", cfg.GrpcPort))
+
 	if err := service.Serve(lis); err != nil {
-		log.Error("error while listening: %v", err)
+		log.Panic("grpcServer.Serve", logger.Error(err))
 	}
 
 }
