@@ -1,2 +1,0 @@
-INSERT INTO "user" ("id", "full_name", "login", "phone", "email","password","user_type")
-    VALUES ('d8e7fdb8-81af-401e-9dee-42d1d7b2353b', 'Abdulahad Abduqahhorov', 'abdulahad','+998990010101', 'example@gmail.com','123456789','SUPERADMIN');
