@@ -9,7 +9,7 @@ import (
 
 type TokenInfo struct {
 	UserId   string
-	Username string
+	UserType string
 }
 
 // GenerateJWT ...
@@ -73,9 +73,9 @@ func ParseClaims(token string, secretKey string) (result TokenInfo, err error) {
 		err = errors.New("cannot parse 'id' field")
 		return result, err
 	}
-	result.Username, ok = claims["username"].(string)
+	result.UserType, ok = claims["user_type"].(string)
 	if !ok {
-		err = errors.New("cannot parse 'username' field")
+		err = errors.New("cannot parse 'user_type' field")
 		return result, err
 	}
 	return

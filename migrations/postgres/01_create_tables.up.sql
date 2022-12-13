@@ -12,7 +12,4 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"updated_at" TIMESTAMP
 );
 
---   insert into "admin"(id,full_name,"login",phone,"password",user_type) values(
--- 	'af7c1fe6-d669-414e-b066-e9733f0de7a8','Abdulahad','aaa','+9999','das','adsa'
---   );
   

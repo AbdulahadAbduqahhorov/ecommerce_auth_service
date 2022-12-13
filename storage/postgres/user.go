@@ -271,10 +271,8 @@ func (u userRepo) Register(req *auth_service.RegisterUserRequest) (string, error
 }
 func (u userRepo) GetUserByUsername(username string) (*auth_service.User, error) {
 	res := &auth_service.User{}
-	var (
-		updatedAt sql.NullString
-		userType  string
-	)
+	var updatedAt sql.NullString
+
 	err := u.db.QueryRow(`
 	SELECT 
 		id,
@@ -288,7 +286,7 @@ func (u userRepo) GetUserByUsername(username string) (*auth_service.User, error)
 		&res.Id,
 		&res.Login,
 		&res.Password,
-		&userType,
+		&res.UserType,
 		&res.CreatedAt,
 		&updatedAt,
 	)

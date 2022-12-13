@@ -21,9 +21,6 @@ type Config struct {
 	PostgresPassword string
 	PostgresDatabase string
 
-	DefaultOffset string
-	DefaultLimit  string
-
 	SecretKey string
 }
 
@@ -39,16 +36,13 @@ func Load() Config {
 	config.Environment = cast.ToString(getOrReturnDefaultValue("ENVIRONMENT", "dev"))
 	config.Version = cast.ToString(getOrReturnDefaultValue("VERSION", "1.0.0"))
 
-	config.GrpcPort = cast.ToString(getOrReturnDefaultValue("GRPC_PORT", ":9001"))
+	config.GrpcPort = cast.ToString(getOrReturnDefaultValue("GRPC_PORT", ":9003"))
 
 	config.PostgresHost = cast.ToString(getOrReturnDefaultValue("POSTGRES_HOST", "localhost"))
 	config.PostgresPort = cast.ToInt(getOrReturnDefaultValue("POSTGRES_PORT", 5432))
 	config.PostgresUser = cast.ToString(getOrReturnDefaultValue("POSTGRES_USER", "postgres"))
 	config.PostgresPassword = cast.ToString(getOrReturnDefaultValue("POSTGRES_PASSWORD", "your_db_password"))
-	config.PostgresDatabase = cast.ToString(getOrReturnDefaultValue("POSTGRES_DATABASE", "uacademy"))
-
-	config.DefaultOffset = cast.ToString(getOrReturnDefaultValue("DEFAULT_OFFSET", "0"))
-	config.DefaultLimit = cast.ToString(getOrReturnDefaultValue("DEFAULT_LIMIT", "10"))
+	config.PostgresDatabase = cast.ToString(getOrReturnDefaultValue("POSTGRES_DATABASE", "postgres"))
 
 	config.SecretKey = cast.ToString(getOrReturnDefaultValue("SECRET_KEY", "yoursecretkey"))
 

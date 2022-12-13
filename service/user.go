@@ -13,6 +13,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type authService struct {
@@ -138,7 +139,7 @@ func (s *authService) UpdateUser(ctx context.Context, req *auth_service.UpdateUs
 	return res, err
 }
 
-func (s *authService) DeleteUser(ctx context.Context, req *auth_service.DeleteUserRequest) (*auth_service.Empty, error) {
+func (s *authService) DeleteUser(ctx context.Context, req *auth_service.DeleteUserRequest) (*emptypb.Empty, error) {
 	s.log.Info("---DeleteUser--->", logger.Any("req", req))
 
 	rowsAffected, err := s.stg.User().DeleteUser(req.Id)
@@ -152,5 +153,5 @@ func (s *authService) DeleteUser(ctx context.Context, req *auth_service.DeleteUs
 		return nil, status.Error(codes.NotFound, "no rows were affected")
 	}
 
-	return &auth_service.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }

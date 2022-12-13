@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"log"
 	"regexp"
 	"time"
 
@@ -86,7 +85,7 @@ func (s *authService) HasAccess(ctx context.Context, req *auth_service.TokenRequ
 	s.log.Info("---HasAccess--->", logger.Any("req", req))
 	res, err := util.ParseClaims(req.Token, s.cfg.SecretKey)
 	if err != nil {
-		log.Println(status.Errorf(codes.Unauthenticated, "method ParseClaims: %v", err))
+		s.log.Error("!!!HasAccess--->", logger.Error(err))
 		return &auth_service.HasAccessResponse{
 			UserId:    "",
 			UserType:  "",
@@ -95,7 +94,7 @@ func (s *authService) HasAccess(ctx context.Context, req *auth_service.TokenRequ
 	}
 	user, err := s.stg.User().GetUserById(res.UserId)
 	if err != nil {
-		log.Println(status.Errorf(codes.Unauthenticated, "method GetUserById: %v", err))
+		s.log.Error("!!!HasAccess--->", logger.Error(err))
 		return &auth_service.HasAccessResponse{
 			UserId:    "",
 			UserType:  "",

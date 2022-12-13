@@ -8,6 +8,7 @@ package auth_service
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -26,7 +27,7 @@ type AuthServiceClient interface {
 	GetUserList(ctx context.Context, in *GetUserListRequest, opts ...grpc.CallOption) (*GetUserListResponse, error)
 	GetUserById(ctx context.Context, in *GetUserByIdRequest, opts ...grpc.CallOption) (*User, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
-	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*Empty, error)
+	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	Register(ctx context.Context, in *RegisterUserRequest, opts ...grpc.CallOption) (*User, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*TokenResponse, error)
 	HasAccess(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*HasAccessResponse, error)
@@ -76,8 +77,8 @@ func (c *authServiceClient) UpdateUser(ctx context.Context, in *UpdateUserReques
 	return out, nil
 }
 
-func (c *authServiceClient) DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *authServiceClient) DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/genproto.AuthService/DeleteUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -120,7 +121,7 @@ type AuthServiceServer interface {
 	GetUserList(context.Context, *GetUserListRequest) (*GetUserListResponse, error)
 	GetUserById(context.Context, *GetUserByIdRequest) (*User, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
-	DeleteUser(context.Context, *DeleteUserRequest) (*Empty, error)
+	DeleteUser(context.Context, *DeleteUserRequest) (*empty.Empty, error)
 	Register(context.Context, *RegisterUserRequest) (*User, error)
 	Login(context.Context, *LoginRequest) (*TokenResponse, error)
 	HasAccess(context.Context, *TokenRequest) (*HasAccessResponse, error)
@@ -143,7 +144,7 @@ func (UnimplementedAuthServiceServer) GetUserById(context.Context, *GetUserByIdR
 func (UnimplementedAuthServiceServer) UpdateUser(context.Context, *UpdateUserRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
 }
-func (UnimplementedAuthServiceServer) DeleteUser(context.Context, *DeleteUserRequest) (*Empty, error) {
+func (UnimplementedAuthServiceServer) DeleteUser(context.Context, *DeleteUserRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
 }
 func (UnimplementedAuthServiceServer) Register(context.Context, *RegisterUserRequest) (*User, error) {

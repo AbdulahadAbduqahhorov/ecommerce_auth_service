@@ -8,6 +8,7 @@ package product_service
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -26,7 +27,7 @@ type ProductServiceClient interface {
 	GetProductList(ctx context.Context, in *GetProductListRequest, opts ...grpc.CallOption) (*GetProductListResponse, error)
 	GetProductById(ctx context.Context, in *GetProductByIdRequest, opts ...grpc.CallOption) (*GetProductByIdResponse, error)
 	UpdateProduct(ctx context.Context, in *UpdateProductRequest, opts ...grpc.CallOption) (*Product, error)
-	DeleteProduct(ctx context.Context, in *DeleteProductRequest, opts ...grpc.CallOption) (*Empty, error)
+	DeleteProduct(ctx context.Context, in *DeleteProductRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type productServiceClient struct {
@@ -73,8 +74,8 @@ func (c *productServiceClient) UpdateProduct(ctx context.Context, in *UpdateProd
 	return out, nil
 }
 
-func (c *productServiceClient) DeleteProduct(ctx context.Context, in *DeleteProductRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *productServiceClient) DeleteProduct(ctx context.Context, in *DeleteProductRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/genproto.ProductService/DeleteProduct", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -90,7 +91,7 @@ type ProductServiceServer interface {
 	GetProductList(context.Context, *GetProductListRequest) (*GetProductListResponse, error)
 	GetProductById(context.Context, *GetProductByIdRequest) (*GetProductByIdResponse, error)
 	UpdateProduct(context.Context, *UpdateProductRequest) (*Product, error)
-	DeleteProduct(context.Context, *DeleteProductRequest) (*Empty, error)
+	DeleteProduct(context.Context, *DeleteProductRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedProductServiceServer()
 }
 
@@ -110,7 +111,7 @@ func (UnimplementedProductServiceServer) GetProductById(context.Context, *GetPro
 func (UnimplementedProductServiceServer) UpdateProduct(context.Context, *UpdateProductRequest) (*Product, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateProduct not implemented")
 }
-func (UnimplementedProductServiceServer) DeleteProduct(context.Context, *DeleteProductRequest) (*Empty, error) {
+func (UnimplementedProductServiceServer) DeleteProduct(context.Context, *DeleteProductRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteProduct not implemented")
 }
 func (UnimplementedProductServiceServer) mustEmbedUnimplementedProductServiceServer() {}
