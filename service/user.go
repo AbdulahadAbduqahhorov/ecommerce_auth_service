@@ -35,7 +35,7 @@ func (s *authService) CreateUser(ctx context.Context, req *auth_service.CreateUs
 	if len(req.Password) < 6 {
 		err := fmt.Errorf("password must not be less than 6 characters")
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	hashedPassword, err := util.HashPassword(req.Password)
@@ -44,6 +44,14 @@ func (s *authService) CreateUser(ctx context.Context, req *auth_service.CreateUs
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	req.Password = hashedPassword
+	
+	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	email := emailRegex.MatchString(req.Email)
+	if !email {
+		err = fmt.Errorf("email is not valid")
+		s.log.Error("!!!CreateUser--->", logger.Error(err))
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 
 	phoneRegex := regexp.MustCompile(`^[+]?(\d{1,2})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$`)
 	phone := phoneRegex.MatchString(req.Phone)
@@ -51,14 +59,7 @@ func (s *authService) CreateUser(ctx context.Context, req *auth_service.CreateUs
 
 		err = fmt.Errorf("phone number is not valid")
 		s.log.Error("!!!CreateUser--->", logger.Error(err))
-		return nil, err
-	}
-	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-	email := emailRegex.MatchString(req.Email)
-	if !email {
-		err = fmt.Errorf("email is not valid")
-		s.log.Error("!!!CreateUser--->", logger.Error(err))
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	pKey, err := s.stg.User().CreateUser(req)

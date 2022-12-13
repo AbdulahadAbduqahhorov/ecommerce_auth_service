@@ -11,5 +11,3 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"created_at" TIMESTAMP DEFAULT now() NOT NULL,
 	"updated_at" TIMESTAMP
 );
-
-  
